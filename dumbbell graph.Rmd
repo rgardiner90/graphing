@@ -1,0 +1,44 @@
+---
+title: "Dummbell"
+author: "Richard G. Gardiner"
+date: "2/11/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The packages you really need are ggplot2 and ggalt.
+
+Once you load the 3 packages I have below and load the data (it is fake data on executions in different states).  The left dot is 1952 and the right dot is 1957.  Just switch out the y (in my case that was country), and the two columns you want to have the dots.  
+
+Under the geom_dumbbell() options, you can mess with the sizing and color.  Feel free to ask if you have any additional questions.  
+
+
+```{r}
+library(tidyverse)
+library(gapminder)
+library(ggalt)
+
+
+gapminder2 <- gapminder %>%
+  filter(year %in% c(1952, 1957)) %>%
+  group_by(country) %>%
+  filter(continent == "Europe") %>%
+  select(country, year, gdpPercap) %>%
+  spread(key = year, value = gdpPercap)
+
+
+ggplot(data = gapminder2, aes(y = country, x = `1952`, xend = `1957`)) +
+  geom_dumbbell(size=3, color="red", 
+                colour_x = "blue", colour_xend = "green",
+                dot_guide=FALSE, dot_guide_size=0.25) +
+  labs(x=NULL, y=NULL, title="ggplot2 geom_dumbbell with dot guide") +
+  theme_minimal() +
+  theme(panel.grid.major.x=element_line(size=0.05)) +
+  theme(panel.grid.major.y=element_blank())
+```
+
+
+
