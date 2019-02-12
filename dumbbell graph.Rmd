@@ -9,29 +9,63 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-The packages you really need are ggplot2 and ggalt.
+I will be using the gapminder dataset which is basic economic and social data about a number of countries over multiple year.
 
-Once you load the 3 packages I have below and load the data (it is fake data on executions in different states).  The left dot is 1952 and the right dot is 1957.  Just switch out the y (in my case that was country), and the two columns you want to have the dots.  
+## Loading Packages
 
-Under the geom_dumbbell() options, you can mess with the sizing and color.  Feel free to ask if you have any additional questions.  
+You will want to load the following packages.
 
-
-```{r}
+1. tidyverse: has reshaping packages and ggplot2 which is the main source
+2. gapminder: a package that includes the gapminder dataset
+3. ggalt: another package that enhances the capabilities of ggplot2.  This is where you actually get the geom_dumbbell function
+```{r, message = FALSE}
 library(tidyverse)
 library(gapminder)
 library(ggalt)
+```
 
+# Loading and Manipulating Data
 
-gapminder2 <- gapminder %>%
-  filter(year %in% c(1952, 1957)) %>%
-  group_by(country) %>%
-  filter(continent == "Europe") %>%
-  select(country, year, gdpPercap) %>%
-  spread(key = year, value = gdpPercap)
+First lets look at the gapminder dataset:
+```{r}
+head(gapminder)
+```
 
+You can see that each row represents a country-year point with a total of 6 columns.  
 
-ggplot(data = gapminder2, aes(y = country, x = `1952`, xend = `1957`)) +
-  geom_dumbbell(size=3, color="red", 
+Let's say we want a dumbbell plot where we want to look at countries in Europe and the GDP per capita (`gdpPercap`) in 1952 and 1957.  To se that we use the following code:
+
+```{r}
+gapminder2 <- gapminder %>% # creates a new object using the gapminder dataset
+  filter(year %in% c(1952, 1957)) %>% # filters out all rows that are not in 1952 and 1957
+  filter(continent == "Europe") %>% # only want observations in Europe
+  select(country, year, gdpPercap) %>% # getting rid of every column that isn't included here
+  spread(key = year, value = gdpPercap) # this is where we make each row now a country instead of country-year
+
+head(gapminder2)
+```
+
+Now we have data that is now useful for dumbbell plots.  For a dumbbell plot, you need 3 columns.  One categorical variable (state, country, person, etc).  In our example that is `country`.  Then you have two data points that you want to be the end of the dumbbell.  It appears that it is normally a time variable.  In this instance our first end will be `1952` and our second is `1957`.  The code below uses this new dataset, `gapminder2`, to create a dumbbell plot.
+
+# Graphing
+
+First I will make a very simple dumbbell graph which only needs the dataset we are using `gapminder2`, along with the specific variables we have: y = country (this is the categorical variable), x = 1952 (the starting point), xend = 1957 (the ending point).
+```{r}
+ggplot(data = gapminder2, # calls ggplot and tells it where the data is
+       aes(y = country, x = `1952`, xend = `1957`)) + 
+  geom_dumbbell()
+```
+
+The plot above uses all basic settings in geom_dumbell.  
+
+The one below shows a lot more preferences.  You can really mess around with each setting.  What I generally do is just delete the bottom line and see what happens, then repeat for each line/setting. 
+
+```{r}
+ggplot(data = gapminder2, # calls ggplot and tells it where the data is
+       aes(y = country, x = `1952`, xend = `1957`)) + # the asthetics: y = CATEGORICAL VARIABLE, x = START_POINT, xend = END_POINT
+  
+  # EVERYTHING NOW IS JUST SETTINGS AND PREFERENCES
+  geom_dumbbell(size=3, color="red",  
                 colour_x = "blue", colour_xend = "green",
                 dot_guide=FALSE, dot_guide_size=0.25) +
   labs(x=NULL, y=NULL, title="ggplot2 geom_dumbbell with dot guide") +
@@ -39,6 +73,4 @@ ggplot(data = gapminder2, aes(y = country, x = `1952`, xend = `1957`)) +
   theme(panel.grid.major.x=element_line(size=0.05)) +
   theme(panel.grid.major.y=element_blank())
 ```
-
-
 
