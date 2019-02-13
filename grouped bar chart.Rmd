@@ -1,0 +1,56 @@
+---
+title: "Grouped Bar Chart"
+author: "Richard G. Gardiner"
+date: "2/12/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+A grouped bar chart is actually pretty simple to do in ggplot2. I actually found pretty simple code at this [website](https://www.r-graph-gallery.com/48-grouped-barplot-with-ggplot2/).  I will walk you through it using the same data as the other day.
+
+## Loading data
+
+First thing we need are the two necessary paackages, and again just a quick look at the gapminder dataset.
+
+
+```{r, message = FALSE}
+library(tidyverse)
+library(gapminder)
+
+head(gapminder)
+```
+
+# Simple Bar graph
+
+The first line is the tidyverse way of called the dataset.  The second line filters out all of the other years, just to make like a little easier.  
+
+The third line of code is the basic ggplot() call where I have labeled the color to be the different continent, the y variable to be the GDP per capita within those continents, then the year to be the x variable.  I had to do as.factor to avoid a weird feature of the data (otherwise it would have tried to treat the x-axis as almost continuous).  The last line calls the most simple bar chart. 
+
+```{r}
+gapminder %>%
+  filter(year %in% c(1952, 1957)) %>%
+  ggplot(aes(fill=continent, y=gdpPercap, x=as.factor(year))) + 
+    geom_bar(stat="identity")
+```
+
+You will see that we get pretty close to the bar chart we want (though there are definitely labeling changes I would make).  
+
+# Grouped Bar Plot
+
+Now we really want to make each continent be right next to each other.  This is where we add one additional option under `geom_bar` that fixes this entire problem.
+
+You will see that the lines of code are exactly the same as the one above, except for the additional option of `position = "dodge")`.  Doing that gives you a grouped bar chart.
+
+
+```{r}
+gapminder %>%
+  filter(year %in% c(1952, 1957)) %>%
+  ggplot(aes(fill=continent, y=gdpPercap, x=as.factor(year))) + 
+    geom_bar(position="dodge", stat="identity")
+```
+
+Hope that helps!
+
