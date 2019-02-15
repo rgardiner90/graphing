@@ -33,7 +33,7 @@ The third line of code is the basic ggplot() call where I have labeled the color
 gapminder %>%
   filter(year %in% c(1952, 1957)) %>%
   ggplot(aes(fill=continent, y=gdpPercap, x=as.factor(year))) + 
-    geom_bar(stat="identity")
+    geom_bar(stat="summary", fun.y = "mean")
 ```
 
 You will see that we get pretty close to the bar chart we want (though there are definitely labeling changes I would make).  
@@ -49,7 +49,15 @@ You will see that the lines of code are exactly the same as the one above, excep
 gapminder %>%
   filter(year %in% c(1952, 1957)) %>%
   ggplot(aes(fill=continent, y=gdpPercap, x=as.factor(year))) + 
-    geom_bar(position="dodge", stat="identity")
+  geom_bar(position="dodge", stat = "summary", fun.y = "mean") 
+```
+
+```{r}
+gapminder %>%
+  group_by(year, continent) %>%
+  filter(year %in% c(1952, 1957)) %>%
+  summarise(mean = mean(gdpPercap)) %>%
+  arrange(year, mean)
 ```
 
 Hope that helps!
