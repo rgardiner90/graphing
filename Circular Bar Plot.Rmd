@@ -1,0 +1,40 @@
+---
+title: "Fun Bar Plot"
+author: "Richard G. Gardiner"
+date: "2/26/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data and Packages
+
+```{r}
+library(tidyverse)
+library(gapminder)
+library(gganimate)
+```
+
+```{r}
+gapminder
+```
+
+```{r}
+gapminder %>%
+  group_by(continent, year) %>%
+  summarize(mean_life_exp = mean(lifeExp)) %>%
+  arrange(continent, mean_life_exp) %>%
+  ggplot(aes(x=continent, y=mean_life_exp, fill = continent)) + 
+  geom_col(width = 0.8) + 
+  coord_flip() +
+  coord_polar(start = 0) +
+  theme_minimal() +
+  labs(main = "test", x = "", y = "") +
+  theme(
+    axis.text = element_blank(),
+    axis.title = element_blank(),
+    panel.grid = element_blank()
+      )
+```
