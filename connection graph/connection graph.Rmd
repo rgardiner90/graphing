@@ -1,0 +1,146 @@
+---
+title: "connected graph"
+author: "Richard G. Gardiner"
+date: "8/23/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+https://www.data-to-viz.com/story/MapConnection.html#
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(zipcode)
+library(maps)
+library(geosphere)
+
+data <- read_excel("connection graph data.xlsx")
+
+data(zipcode)
+zipcode
+
+connection_data <- data %>%
+  left_join(zipcode, by = "zip") %>%
+  mutate(california = "California",
+         cal_long = -121.55541,
+         cal_lat = 38.38046)
+
+connection_data
+
+row.names(connection_data) <- connection_data$School
+
+rownames(connection_data)
+```
+
+
+```{r}
+plot_my_connection <- function( dep_lon, dep_lat, arr_lon, arr_lat, ...) {
+    inter <- gcIntermediate(c(dep_lon, dep_lat), c(arr_lon, arr_lat), n=5, addStartEnd=TRUE, breakAtDateLine=F)             
+    inter <- data.frame(inter)
+    diff_of_lon=abs(dep_lon) + abs(arr_lon)
+    
+    if(diff_of_lon > 180) {
+        lines(subset(inter, lon>=0), ...)
+        lines(subset(inter, lon<0), ...)
+    } else {
+        lines(inter, ...)
+        }
+}
+
+par(mar=c(0,0,0,0))
+
+map('usa',
+    col="#f2f2f2", fill=TRUE, bg="white", lwd=0.05,
+    mar=rep(0,4),border=0, ylim=c(20,55)) 
+    
+for(i in 1:nrow(connection_data)) {
+  plot_my_connection(connection_data$longitude[i], connection_data$latitude[i],
+                      connection_data$cal_long[i], connection_data$cal_lat[i],
+                     col = "#00BFFF", lwd = 1)
+}
+
+points(x = connection_data$longitude, connection_data$latitude, col="#00BFFF", cex=2, pch=20)
+```
+
+
+
+
+
+## Individual level data
+
+```{r}
+individual <- read_excel("individuals.xlsx")
+
+connection_data_individual <- individual %>%
+  left_join(zipcode, by = "zip") %>%
+  mutate(california = "California",
+         cal_long = -121.55541,
+         cal_lat = 38.38046)
+
+summary <- connection_data_individual %>% 
+  count(latitude, longitude, state, cal_lat, cal_long, california, School) %>%
+  arrange(n)
+```
+
+```{r}
+data_for_connection <- function( dep_lon, dep_lat, arr_lon, arr_lat, group) {
+  inter <- gcIntermediate(c(dep_lon, dep_lat), c(arr_lon, arr_lat), n=50, addStartEnd=TRUE, breakAtDateLine=F)             
+  inter <- data.frame(inter)
+  inter$group <- NA
+  diff_of_lon <- abs(dep_lon) + abs(arr_lon)
+  if(diff_of_lon > 180){
+    inter$group[ which(inter$lon>=0)] = paste(group, "A",sep="")
+    inter$group[ which(inter$lon<0)] = paste(group, "B",sep="")
+  }else{
+    inter$group = group
+  }
+  return(inter)
+}
+
+data_ready_plot <- data.frame()
+for(i in c(1:nrow(summary))) {
+  tmp=data_for_connection(summary$longitude[i], summary$latitude[i], summary$cal_long[i], summary$cal_lat[i] , i)
+  tmp$n=summary$n[i]
+  data_ready_plot=rbind(data_ready_plot, tmp)
+}
+```
+
+```{r}
+ggplot() +
+  geom_polygon(data = map_data("usa"), aes(x = long, y = lat, group = group)) +
+  geom_line(data = data_ready_plot, aes(lon, lat, group = group, alpha = n), color = "#00BFFF", size = 1,
+            show.legend = FALSE) +
+  geom_text(data = connection_data, aes(x = longitude, y = latitude, label = School),
+            color = "#00BFFF", check_overlap = TRUE) +
+  theme_void() +
+  labs(title = "Where did people come from to \ntake the California bar")
+
+# ggsave("connection.jpeg")
+```
+
+
+```{r}
+ggplot() +
+  geom_polygon(data = map_data("usa"), aes(x = long, y = lat, group = group)) +
+  geom_line(data = data_ready_plot, aes(lon, lat, group = group, alpha = n), color = "#00BFFF", size = 1,
+            show.legend = FALSE,
+            arrow = arrow(ends = "first")) +
+  geom_text(data = connection_data, aes(x = longitude, y = latitude, label = School),
+            color = "#00BFFF", check_overlap = TRUE) +
+  theme_void() +
+  labs(title = "Where did people come from to \ntake the California bar")
+
+# ggsave("connection with arrow.jpeg")
+```
+
+
+
+
+
+
+
