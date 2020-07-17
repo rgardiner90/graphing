@@ -1,0 +1,50 @@
+---
+title: "sankey chart (alluvial)"
+author: "Richard G. Gardiner"
+date: "8/28/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(tidyverse)
+library(ggalluvial)
+
+admissions <- as_tibble(UCBAdmissions)
+
+admissions %>%
+  ggplot(aes(axis1 = Gender, axis2 = Dept, y = n)) +
+  geom_alluvium(aes(fill = Admit), width = 1/12) +
+  geom_stratum(width = 1/12, fill = "black", color = "grey") +
+  geom_label(stat = "stratum", label.strata = TRUE) +
+  theme_classic() +
+  scale_x_discrete(limits = c("Gender", "Department")) +
+  scale_fill_manual(values = c("#003262", "#c4820f")) +
+  coord_cartesian(xlim = c(1.4, 1.6)) +
+  theme(axis.line = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank()) +
+  labs(y = NULL, fill = "Admissions Status",
+       title = "UC - Berkeley Graduate Admissions Decisions by Gender and Department",
+       subtitle = "Women Applied to Departments with Low Overall Acceptance Rates")
+
+admissions %>%
+  group_by(Gender, Admit) %>%
+  summarise(sum = sum(n))
+```
+
+
+
+Next Idea: 
+1. Do Race (axis 1) and bar passage (axis2) using LSSSE
+2. Do Race and admissions status (admitted, denied, enrolled) using the Kentucky data
+
+
+
+
+
+

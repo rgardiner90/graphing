@@ -1,0 +1,17 @@
+continent_name,name,value
+Africa,Africa,3.142471
+Africa,Europe,2.107883
+Africa,Oceania,0.155988
+Africa,North.America,0.540887
+Europe,Africa,0
+Europe,Europe,2.401476
+Europe,Oceania,0
+Europe,North.America,0
+North America,Africa,0
+North America,Europe,1.215929
+North America,Oceania,0
+North America,North.America,0
+Oceania,Africa,0
+Oceania,Europe,0.17037
+Oceania,Oceania,0.190706
+Oceania,North.America,0

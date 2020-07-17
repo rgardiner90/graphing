@@ -1,0 +1,49 @@
+---
+title: "matrix"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(circlize)
+library(tidyverse)
+library(nycflights13)
+# library(chorddiag) # need install_github()
+
+# common_paths <- flights %>%
+#   count(month, origin, dest, sort = TRUE) %>%
+#   filter(n >= 600) %>%
+#   select(-month) 
+# 
+# 
+# common_paths %>%
+#   chordDiagram() 
+```
+
+Here is an example using fake migration data. I think this will be helpful.
+```{r}
+toy_migration <- read_csv("toy_migration_dataset.csv")
+
+
+toy_migration2 <- toy_migration %>%
+  rename("from" = 1,
+         "to" = 2,
+         "migration" = 3) %>%
+  mutate(migration = ifelse(migration < 0.00001, runif(1), migration),
+         to = ifelse(to == "North.America", "North America", to))
+
+arr.col = data.frame(c("North America", "North America", "North America", "North America"), 
+                     c("Europe", "Oceania", "Africa", "North America"), 
+                     c("black", "yellow", "blue", "green"))
+
+toy_migration2 %>%
+  chordDiagram(directional = 1, direction.type = "arrows", 
+               link.arr.col = arr.col, link.arr.length = 0.2)
+title("Migration from Continents (Simulated Data)")
+```
+
+next deal with directionality: https://jokergoo.github.io/circlize_book/book/the-chorddiagram-function.html
+
