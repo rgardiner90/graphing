@@ -1,0 +1,76 @@
+---
+title: "admissions flow"
+author: "Richard G. Gardiner"
+date: "8/29/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(tidyverse)
+library(ggalluvial)
+
+admissions_raw <- read_csv("alluvial data.csv")
+
+admissions_raw %>%
+  count(Race)
+```
+
+```{r}
+admissions <- admissions_raw %>%
+  mutate(Race = as.character(fct_lump(Race, 3))) %>%
+  mutate(race = ifelse(Race == "Black/African American", "Black", 
+                       ifelse(Race == "Caucasian/White", "White", 
+                              ifelse(Race == "Hispanic/Latino", "Hispanic", Race)))) %>%
+  select(-Race) %>%
+  filter(Status != "Decision_Status_Long",
+         Status != "Deferred")
+```
+
+
+```{r}
+admissions %>%
+  count(race, School, Status) %>%
+  ggplot(aes(axis1 = race, axis2 = School, y = n)) +
+  geom_alluvium(aes(fill = Status), width = 1/10) +
+  geom_stratum(width = 1/5, fill = "black", color = "grey") +
+  geom_label(stat = "stratum", label.strata = TRUE) +
+  scale_fill_manual(values = c("#003262", "#c4820f")) +
+  scale_x_discrete(limits = c("Race", "School")) +
+  coord_cartesian(xlim = c(1.4, 1.5)) +
+  theme_classic() +
+  theme(axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.y = element_blank()) +
+  labs(y = NULL, fill = "Admissions Decision", 
+       title = "Showing the Admissions of Individuals into Schools by Race")
+```
+
+
+```{r}
+admissions %>%
+  count(race, School, Status) %>%
+  ggplot(aes(axis1 = race, axis2 = School, y = n)) +
+  geom_alluvium(aes(fill = Status), width = 1/10) +
+  geom_stratum(width = 1/5, fill = "#002b49", color = "grey") +
+  geom_text(stat = "stratum", label.strata = TRUE, color = "white") +
+  scale_fill_manual(values = c("#556221", "#8f1336")) +
+  scale_x_discrete(limits = c("Race", "School")) +
+  coord_cartesian(xlim = c(1.4, 1.5)) +
+  theme_classic() +
+  theme(axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.y = element_blank()) +
+  labs(y = NULL, fill = "Admissions Decision", 
+       title = "Showing the Admissions of Individuals into Schools by Race")
+
+# ggsave("alluvial chart.png")
+```
+
+
+
+
